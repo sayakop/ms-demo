@@ -1,15 +1,12 @@
 package com.think.ms_demo.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookid;
     private String title;
     private String genre;
@@ -74,7 +71,5 @@ public class Book {
     public void setVendorId(Long vendorId) {
         this.vendorId = vendorId;
     }
-
-    
 
 }
