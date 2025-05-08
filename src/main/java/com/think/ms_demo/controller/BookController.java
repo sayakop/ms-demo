@@ -81,14 +81,14 @@ public class BookController {
        // );
   //  }
 
-    @ExceptionHandler(EntityNotFoundException.class) // Handle the exception
-    public ResponseEntity<Object> NotFoundBookException(EntityNotFoundException ex) {
-        return BookResponseHandler.responseBuilder(
-                ex.getMessage(), // Get the message from the exception
-                HttpStatus.NOT_FOUND,
-                null // No data needed in the body for this error
-        );
-    }
+   // @ExceptionHandler(EntityNotFoundException.class) // Handle the exception
+   // public ResponseEntity<Object> NotFoundBookException(EntityNotFoundException ex) {
+      //  return BookResponseHandler.responseBuilder(
+            //    ex.getMessage(), // Get the message from the exception
+              //  HttpStatus.NOT_FOUND,
+              //  null // No data needed in the body for this error
+      //  );
+   // }
 
     @DeleteMapping("/{bookid}")
     public ResponseEntity<String>  deleteBook(@PathVariable Long bookid)
