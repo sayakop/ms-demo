@@ -5,9 +5,11 @@ import java.util.Optional;
 
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.think.ms_demo.repository.BookRepository;
 import com.think.ms_demo.exception.BookException.NotFoundBookException;
+import com.think.ms_demo.external.Vendor;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
 
@@ -24,6 +26,15 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Book> getAllBooks()
     {
+        RestTemplate restTemplate = new RestTemplate();
+        Vendor vendor = restTemplate.getForObject("http://localhost:8081/vendor/C1", Vendor.class);
+        if (vendor != null) {
+            System.out.println("Vendor ID: " + vendor.getVendorId());
+            System.out.println("Vendor Name: " + vendor.getVendorName());
+            System.out.println("Vendor Address: " + vendor.getVendorAddress());
+        } else {
+            System.out.println("Vendor information is not available.");
+        }
         return bookRepository.findAll();
     }
 
