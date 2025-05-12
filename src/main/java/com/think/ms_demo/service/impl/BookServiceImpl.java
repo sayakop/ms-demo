@@ -1,9 +1,8 @@
 package com.think.ms_demo.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -30,22 +29,27 @@ public class BookServiceImpl implements BookService {
     {
 
         List<Book> books = bookRepository.findAll();
-        List<BookWithVendorDTO> bookWithVendorDTOs = new ArrayList<>();
+        return books.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
 
         
-        RestTemplate restTemplate = new RestTemplate();
+}
 
-        for (Book book : books) {
-               BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, null);
-                bookWithVendorDTO.setBook(book);
+    private BookWithVendorDTO convertToDto(Book book) {
+        BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, null);
+        // Assuming you have a method to fetch vendor details using the vendorId
+        bookWithVendorDTO.setBook(book);
+                // Fetch vendor details using RestTemplate
+                // You can replace the URL with your actual vendor service URL
+                // For example: http://localhost:8081/vendor/{vendorId}
+        RestTemplate restTemplate = new RestTemplate();
 
                 Vendor vendor = restTemplate.getForObject("http://localhost:8081/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
                 bookWithVendorDTO.setVendor(vendor);
-                bookWithVendorDTOs.add(bookWithVendorDTO);
-
+        return bookWithVendorDTO;
     }
-        return bookWithVendorDTOs;
-}
 
     @Override
     public Book addBooks(Book book)
