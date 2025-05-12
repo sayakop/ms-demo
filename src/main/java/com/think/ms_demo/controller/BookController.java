@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.think.ms_demo.dto.BookWithVendorDTO;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.response.BookResponseHandler;
 import com.think.ms_demo.service.BookService;
@@ -41,9 +42,10 @@ public class BookController {
     //Get All Books from DB
 
     @GetMapping
-    public ResponseEntity<List<Book>> getAllBooks()  
+    public ResponseEntity<List<BookWithVendorDTO>> getAllBooks()  
     {
-        return new ResponseEntity<>(bookService.getAllBooks(),HttpStatus.OK);
+        return ResponseEntity.ok(bookService.getAllBooks());
+    //return BookResponseHandler.responseBuilder("All Books are here", HttpStatus.OK, bookService.getAllBooks());
     }
 
     // Get a Particular Book from DB
