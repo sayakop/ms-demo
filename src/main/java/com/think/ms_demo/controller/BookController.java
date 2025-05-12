@@ -41,9 +41,9 @@ public class BookController {
     //Get All Books from DB
 
     @GetMapping
-    public List<Book> getAllBooks()  
+    public ResponseEntity<List<Book>> getAllBooks()  
     {
-        return bookService.getAllBooks();
+        return new ResponseEntity<>(bookService.getAllBooks(),HttpStatus.OK);
     }
 
     // Get a Particular Book from DB
