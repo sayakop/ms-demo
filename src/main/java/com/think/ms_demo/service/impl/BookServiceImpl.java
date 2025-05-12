@@ -32,10 +32,7 @@ public class BookServiceImpl implements BookService {
         return books.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
-
-
-        
-}
+    }
 
     private BookWithVendorDTO convertToDto(Book book) {
         BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, null);
