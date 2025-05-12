@@ -31,22 +31,21 @@ public class BookServiceImpl implements BookService {
 
         List<Book> books = bookRepository.findAll();
         List<BookWithVendorDTO> bookWithVendorDTOs = new ArrayList<>();
+
+        
+        RestTemplate restTemplate = new RestTemplate();
+
         for (Book book : books) {
-            try {
-                RestTemplate restTemplate = new RestTemplate();
-                Vendor vendor = restTemplate.getForObject("http://localhost:8081/vendor/" + book.getVendorId(), Vendor.class);
-                if (vendor != null) {
-                    BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, vendor);
-                    bookWithVendorDTOs.add(bookWithVendorDTO);
-                } else {
-                    System.out.println("Vendor information is not available for book ID: " + book.getBookid());
-                }
-            } catch (Exception e) {
-                System.err.println("Error fetching vendor for book ID " + book.getBookid() + ": " + e.getMessage());
-            }
-        }
-        return bookWithVendorDTOs;
+               BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, null);
+                bookWithVendorDTO.setBook(book);
+
+                Vendor vendor = restTemplate.getForObject("http://localhost:8081/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
+                bookWithVendorDTO.setVendor(vendor);
+                bookWithVendorDTOs.add(bookWithVendorDTO);
+
     }
+        return bookWithVendorDTOs;
+}
 
     @Override
     public Book addBooks(Book book)
