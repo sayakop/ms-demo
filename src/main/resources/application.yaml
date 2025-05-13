@@ -2,6 +2,8 @@ server:
   port: 8082
 
 spring:
+    application:
+        name: book-service
     datasource:
         url: jdbc:mysql://localhost:3306/springbootdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
         driver-class-name: com.mysql.cj.jdbc.Driver
