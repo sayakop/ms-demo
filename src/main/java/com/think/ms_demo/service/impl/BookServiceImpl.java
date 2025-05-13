@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +20,10 @@ import com.think.ms_demo.service.BookService;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
+    // Constructor-based dependency injection
 
     public BookServiceImpl(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
@@ -41,9 +46,9 @@ public class BookServiceImpl implements BookService {
                 // Fetch vendor details using RestTemplate
                 // You can replace the URL with your actual vendor service URL
                 // For example: http://localhost:8081/vendor/{vendorId}
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
 
-                Vendor vendor = restTemplate.getForObject("http://localhost:8081/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
+                Vendor vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
                 bookWithVendorDTO.setVendor(vendor);
         return bookWithVendorDTO;
     }
