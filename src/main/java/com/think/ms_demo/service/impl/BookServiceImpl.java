@@ -10,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.think.ms_demo.repository.BookRepository;
 import com.think.ms_demo.dto.BookWithVendorDTO;
-import com.think.ms_demo.exception.BookException.NotFoundBookException;
 import com.think.ms_demo.external.Vendor;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
@@ -60,9 +59,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book getBook(Long bookid) {
-            return bookRepository.findById(bookid)
-                    .orElseThrow(() -> new NotFoundBookException("Requested Book Not Found"));
+    public BookWithVendorDTO getBook(Long bookid) {
+        Book book = bookRepository.findById(bookid).orElse(null);
+        return convertToDto(book);
         }
         
     @Override
