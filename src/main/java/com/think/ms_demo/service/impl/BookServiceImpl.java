@@ -5,12 +5,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.think.ms_demo.repository.BookRepository;
-import com.think.ms_demo.dto.BookWithVendorDTO;
+import com.think.ms_demo.dto.BookDTO;
+import com.think.ms_demo.external.Review;
 import com.think.ms_demo.external.Vendor;
+import com.think.ms_demo.mapper.BookMapper;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
 
@@ -35,7 +40,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookWithVendorDTO> getAllBooks()
+    public List<BookDTO> getAllBooks()
     {
 
         List<Book> books = bookRepository.findAll();
@@ -44,19 +49,23 @@ public class BookServiceImpl implements BookService {
                 .collect(Collectors.toList());
     }
 
-    private BookWithVendorDTO convertToDto(Book book) {
-        BookWithVendorDTO bookWithVendorDTO = new BookWithVendorDTO(book, null);
-        // Assuming you have a method to fetch vendor details using the vendorId
-        bookWithVendorDTO.setBook(book);
-                // Fetch vendor details using RestTemplate
-                // You can replace the URL with your actual vendor service URL
-                // For example: http://localhost:8081/vendor/{vendorId}
-        //RestTemplate restTemplate = new RestTemplate();
+    private BookDTO convertToDto(Book book) {
+        Vendor vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() 
+        + "?raw=true", Vendor.class);
 
-                Vendor vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
-                bookWithVendorDTO.setVendor(vendor);
-        return bookWithVendorDTO;
+        ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
+                "http://review-demo/review/book/" + book.getBookid(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Review>>() {});
+
+        List<Review> reviews = reviewResponse.getBody();
+
+            BookDTO bookDTO = BookMapper.mapToBookDTO(book, vendor,reviews);                 
+            bookDTO.setVendor(vendor);
+        return bookDTO;
     }
+
 
     @Override
     public Book addBooks(Book book)
@@ -65,7 +74,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookWithVendorDTO getBook(Long bookid) {
+    public BookDTO getBook(Long bookid) {
         Book book = bookRepository.findById(bookid).orElse(null);
         return convertToDto(book);
         }
