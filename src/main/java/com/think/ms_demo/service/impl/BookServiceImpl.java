@@ -21,8 +21,14 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
     // Constructor-based dependency injection
+
+    @Autowired
+    public RestTemplate restTemplate()
+    {
+        return new RestTemplate();
+    }
 
     public BookServiceImpl(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
