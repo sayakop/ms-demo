@@ -45,7 +45,7 @@ public class BookServiceImpl implements BookService {
         List<Book> books = bookRepository.findAll();
         return books.stream()
                 .map(this::convertToDtoSafe)
-                .filter(dto -> dto != null)
+                .filter(bookDTO -> bookDTO != null) // Filter out null DTO
                 .collect(Collectors.toList());
     }
 
@@ -107,16 +107,12 @@ public class BookServiceImpl implements BookService {
     }
 
      private BookDTO convertToDto(Book book) {
-        if (book == null) {
-            throw new IllegalArgumentException("Book cannot be null for DTO conversion");
-        }
-
         Vendor vendor = null;
         List<Review> reviews = new ArrayList<>();
 
         try {
             ResponseEntity<Vendor> vendorResponse = restTemplate.exchange(
-                    "http://vendor-demo/vendor/" + book.getVendorId(),
+                    "http://vendor-demo/vendor/" + book.getVendorId() + "?raw=true",
                     HttpMethod.GET,
                     null,
                     Vendor.class
@@ -132,7 +128,7 @@ public class BookServiceImpl implements BookService {
 
         try {
             ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
-                    "http://reviewms/review/book/" + book.getBookid(),
+                     "http://localhost:<port>/review/" + book.getVendorId() + "?raw=true",
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<List<Review>>() {}
