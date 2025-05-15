@@ -1,5 +1,6 @@
 package com.think.ms_demo.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,22 +19,21 @@ import com.think.ms_demo.external.Vendor;
 import com.think.ms_demo.mapper.BookMapper;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 @Service
 public class BookServiceImpl implements BookService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
 
     private final BookRepository bookRepository;
 
     @Autowired
     private RestTemplate restTemplate;
     // Constructor-based dependency injection
-
-    @Autowired
-    public RestTemplate restTemplate()
-    {
-        return new RestTemplate();
-    }
 
     public BookServiceImpl(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
@@ -49,22 +49,32 @@ public class BookServiceImpl implements BookService {
                 .collect(Collectors.toList());
     }
 
-    private BookDTO convertToDto(Book book) {
-        Vendor vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() 
-        + "?raw=true", Vendor.class);
+   private BookDTO convertToDto(Book book) {
+    Vendor vendor = null;
+    List<Review> reviews = new ArrayList<>();
 
+    try {
+        vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
+        } catch (Exception e) {
+            log.error("Error fetching vendor for ID {}: {}", book.getVendorId(), e.getMessage(), e);
+    }        
+    try {
         ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
-                "http://review-demo/review/book/" + book.getBookid(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Review>>() {});
+            "http://reviewms/review/" + book.getBookid(),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<List<Review>>() {});
+        reviews = reviewResponse.getBody();
+        } 
+        catch (Exception e) 
+        {
+            log.error("Error fetching reviews for book ID {}: {}", book.getBookid(), e.getMessage(), e);
+        }
 
-        List<Review> reviews = reviewResponse.getBody();
-
-            BookDTO bookDTO = BookMapper.mapToBookDTO(book, vendor,reviews);                 
-            bookDTO.setVendor(vendor);
+        BookDTO bookDTO = BookMapper.mapToBookDTO(book, vendor, reviews);                 
+        bookDTO.setVendor(vendor);
         return bookDTO;
-    }
+}
 
 
     @Override
