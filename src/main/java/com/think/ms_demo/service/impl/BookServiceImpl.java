@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
 @Service
 public class BookServiceImpl implements BookService {
 
@@ -34,8 +33,8 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private RestTemplate restTemplate;
     // Constructor-based dependency injection
-
-    public BookServiceImpl(BookRepository bookRepository) {
+    public BookServiceImpl(BookRepository bookRepository, RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
         this.bookRepository = bookRepository;
     }
 
@@ -45,37 +44,10 @@ public class BookServiceImpl implements BookService {
 
         List<Book> books = bookRepository.findAll();
         return books.stream()
-                .map(this::convertToDto)
+                .map(this::convertToDtoSafe)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
-
-   private BookDTO convertToDto(Book book) {
-    Vendor vendor = null;
-    List<Review> reviews = new ArrayList<>();
-
-    try {
-        vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId() + "?raw=true", Vendor.class);
-        } catch (Exception e) {
-            log.error("Error fetching vendor for ID {}: {}", book.getVendorId(), e.getMessage(), e);
-    }        
-    try {
-        ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
-            "http://reviewms/review/" + book.getBookid(),
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<Review>>() {});
-        reviews = reviewResponse.getBody();
-        } 
-        catch (Exception e) 
-        {
-            log.error("Error fetching reviews for book ID {}: {}", book.getBookid(), e.getMessage(), e);
-        }
-
-        BookDTO bookDTO = BookMapper.mapToBookDTO(book, vendor, reviews);                 
-        bookDTO.setVendor(vendor);
-        return bookDTO;
-}
-
 
     @Override
     public Book addBooks(Book book)
@@ -85,9 +57,14 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO getBook(Long bookid) {
-        Book book = bookRepository.findById(bookid).orElse(null);
-        return convertToDto(book);
+        Optional<Book> optionalBook = bookRepository.findById(bookid);
+        if (optionalBook.isEmpty()) {
+            log.warn("Book with ID {} not found", bookid);
+            return null; // or throw custom BookNotFoundException
         }
+
+        return convertToDtoSafe(optionalBook.get());
+    }
         
     @Override
     public boolean deleteBook(Long bookid)
@@ -95,10 +72,10 @@ public class BookServiceImpl implements BookService {
         Optional<Book> book = bookRepository.findById(bookid);
         if (book.isPresent()) {
             bookRepository.delete(book.get());
-            System.out.println("Book Deleted Successfully");
+            log.info("Book with ID {} deleted successfully", bookid);
             return true; // book was found and deleted
         } else {
-            System.out.println("Book Not found");
+            log.warn("Attempted to delete non-existent book with ID {}", bookid);
             return false; // book was not found
         }
     }
@@ -119,4 +96,57 @@ public class BookServiceImpl implements BookService {
             return bookRepository.save(book);
         }
     }
+
+    private BookDTO convertToDtoSafe(Book book) {
+        try {
+            return convertToDto(book);
+        } catch (Exception e) {
+            log.error("Failed to convert Book ID {} to DTO: {}", book != null ? book.getBookid() : "null", e.getMessage(), e);
+            return null;
+        }
+    }
+
+     private BookDTO convertToDto(Book book) {
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null for DTO conversion");
+        }
+
+        Vendor vendor = null;
+        List<Review> reviews = new ArrayList<>();
+
+        try {
+            ResponseEntity<Vendor> vendorResponse = restTemplate.exchange(
+                    "http://vendor-demo/vendor/" + book.getVendorId(),
+                    HttpMethod.GET,
+                    null,
+                    Vendor.class
+            );
+            if (vendorResponse.getStatusCode().is2xxSuccessful()) {
+                vendor = vendorResponse.getBody();
+            } else {
+                log.warn("Vendor not found or error for book ID {}: {}", book.getBookid(), vendorResponse.getStatusCode());
+            }
+        } catch (Exception ex) {
+            log.error("Error while fetching vendor for book ID {}: {}", book.getBookid(), ex.getMessage());
+        }
+
+        try {
+            ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
+                    "http://reviewms/review/book/" + book.getBookid(),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Review>>() {}
+            );
+            if (reviewResponse.getStatusCode().is2xxSuccessful() && reviewResponse.getBody() != null) {
+                reviews = reviewResponse.getBody();
+            } else {
+                log.warn("No reviews or error for book ID {}: {}", book.getBookid(), reviewResponse.getStatusCode());
+            }
+        } catch (Exception ex) {
+            log.error("Error while fetching reviews for book ID {}: {}", book.getBookid(), ex.getMessage());
+        }
+
+        return BookMapper.mapToBookDTO(book, vendor, reviews);
+    }
 }
+
