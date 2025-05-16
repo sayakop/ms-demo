@@ -128,7 +128,7 @@ public class BookServiceImpl implements BookService {
 
         try {
             ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
-                     "http://localhost:<port>/review/" + book.getVendorId() + "?raw=true",
+                     "http://reviewms/review/" + book.getBookid() + "?raw=true",
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<List<Review>>() {}
