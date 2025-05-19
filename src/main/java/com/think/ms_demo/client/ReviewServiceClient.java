@@ -1,31 +1,18 @@
 package com.think.ms_demo.client;
 
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import com.think.ms_demo.external.Review;
 
-@Service
-public class ReviewServiceClient {
+@FeignClient(name = "review-service", url = "${review.service.base-url}")
+public interface ReviewServiceClient {
+    
+    @GetMapping("/review/{reviewId}")
+    List<Review> getReview(@PathVariable Long reviewId);
 
-     private final RestTemplate restTemplate;
-
-    @Value("${review.service.base-url}")
-    private String reviewServiceBaseUrl; // e.g., http://localhost:8083
-
-    public ReviewServiceClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
-    public Review getReviewById(Long reviewId, Long bookId) {
-        String url = reviewServiceBaseUrl + "/reviews/" + reviewId + "/book/" + bookId;
-        try {
-            return restTemplate.getForObject(url, Review.class);
-        } catch (RestClientException e) {
-            // Log and handle exception gracefully
-            return null;
-        }
-    }
 }

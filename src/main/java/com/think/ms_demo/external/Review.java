@@ -34,7 +34,6 @@ public class Review {
         this.rating = rating;
     }
     public Long getBookid() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getBookid'");
     }
 }
