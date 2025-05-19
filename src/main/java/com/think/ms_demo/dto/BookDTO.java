@@ -95,8 +95,8 @@ public class BookDTO {
     public List<Review> getReview() {
         return review;
     }
-    public void setReview(List<Review> review) {
-        this.review = review;
+    public void setReview(List<Review> reviews) {
+        this.review = reviews;
     }
 
 }

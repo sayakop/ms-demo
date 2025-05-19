@@ -9,7 +9,7 @@ public interface BookService {
 
     public Book addBooks(Book book);
     public boolean deleteBook(Long bookid);
-    public BookDTO getBook(Long bookid);
+    public BookDTO getBook(Long bookid,Long reviewId);
     public List<BookDTO> getAllBooks();
     public Book updateBooks(Long bookid,Book book);
 

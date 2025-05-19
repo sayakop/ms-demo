@@ -33,4 +33,8 @@ public class Review {
     public void setRating(long rating) {
         this.rating = rating;
     }
+    public Long getBookid() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBookid'");
+    }
 }

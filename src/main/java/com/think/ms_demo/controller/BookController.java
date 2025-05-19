@@ -49,16 +49,13 @@ public class BookController {
     }
 
     // Get a Particular Book from DB
-    @GetMapping("{bookid}")
-    public ResponseEntity<BookDTO> getBook(@PathVariable Long bookid)
+    @GetMapping("{bookid}/reviews/{reviewId}")
+    public ResponseEntity<Object> getBookbyId(@PathVariable long bookid,@PathVariable long reviewId)
     {
-        BookDTO bookDTO = bookService.getBook(bookid);
-        if (bookDTO == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        else {
-            return new ResponseEntity<>(bookDTO, HttpStatus.OK);
-        }
+        BookDTO book = bookService.getBook(bookid,reviewId);
+        return book != null
+            ? BookResponseHandler.responseBuilder("Book Found", HttpStatus.OK, book)
+            : BookResponseHandler.responseBuilder("Book Not Found", HttpStatus.NOT_FOUND, null);
     }
  
     @PostMapping("")

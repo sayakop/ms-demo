@@ -1,6 +1,7 @@
 package com.think.ms_demo.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.think.ms_demo.repository.BookRepository;
+import com.think.ms_demo.client.ReviewServiceClient;
 import com.think.ms_demo.dto.BookDTO;
 import com.think.ms_demo.external.Review;
 import com.think.ms_demo.external.Vendor;
@@ -30,12 +32,17 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final ReviewServiceClient reviewServiceClient;
+
+
+
     @Autowired
     private RestTemplate restTemplate;
     // Constructor-based dependency injection
-    public BookServiceImpl(BookRepository bookRepository, RestTemplate restTemplate) {
+    public BookServiceImpl(BookRepository bookRepository, RestTemplate restTemplate,ReviewServiceClient reviewServiceClient) {
         this.restTemplate = restTemplate;
         this.bookRepository = bookRepository;
+        this.reviewServiceClient = reviewServiceClient;
     }
 
     @Override
@@ -56,14 +63,24 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDTO getBook(Long bookid) {
-        Optional<Book> optionalBook = bookRepository.findById(bookid);
-        if (optionalBook.isEmpty()) {
+    public BookDTO getBook(Long bookid,Long reviewId) {
+        Optional<Book> bookOptional = bookRepository.findById(bookid);
+        if (bookOptional.isPresent()) {
+            Book book = bookOptional.get();
+            BookDTO bookDTO = convertToDtoSafe(book);
+            if (bookDTO != null) {
+                Review review = reviewServiceClient.getReviewById(reviewId, bookid);
+                 if (review != null && review.getBookid() == bookid) {
+                    bookDTO.setReview(List.of(review));
+                } else {
+                    bookDTO.setReview(Collections.emptyList());
+                }
+            }
+            return bookDTO;
+        } else {
             log.warn("Book with ID {} not found", bookid);
-            return null; // or throw custom BookNotFoundException
+            return null; // or throw an exception
         }
-
-        return convertToDtoSafe(optionalBook.get());
     }
         
     @Override
