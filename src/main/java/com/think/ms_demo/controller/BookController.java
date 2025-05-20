@@ -39,12 +39,9 @@ public class BookController {
         return new ResponseEntity<>("Welcome to the Book Details", HttpStatus.OK);
     }
     @GetMapping
-    public ResponseEntity<List<BookDTO>> getAllBooks()  
+    public List<BookDTO> getAllBooks()  
     {
-        List<BookDTO> books = bookService.getAllBooks();
-        if (books == null || books.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } return ResponseEntity.ok(books);
+        return bookService.getAllBooks();
     }
 
     // Get a Particular Book from DB
@@ -72,26 +69,6 @@ public class BookController {
         return BookResponseHandler.responseBuilder("Book Details Updated Successfully", HttpStatus.OK, book);
     }
 
-   // @PutMapping("/{bookid}/assignvendor")
-   // public ResponseEntity<Object> assignVendorBook(
-       // @PathVariable Long bookid,@RequestParam String vendorId) {
-
-            //Book updatedBook = bookService.assignVendorBook(bookid, vendorId); // No longer returns Object
-            //return BookResponseHandler.responseBuilder(
-               // "Vendor assigned to book successfully",
-               // HttpStatus.OK,
-               // updatedBook // Return the updated book
-       // );
-  //  }
-
-   // @ExceptionHandler(EntityNotFoundException.class) // Handle the exception
-   // public ResponseEntity<Object> NotFoundBookException(EntityNotFoundException ex) {
-      //  return BookResponseHandler.responseBuilder(
-            //    ex.getMessage(), // Get the message from the exception
-              //  HttpStatus.NOT_FOUND,
-              //  null // No data needed in the body for this error
-      //  );
-   // }
 
     @DeleteMapping("/{bookid}")
     public ResponseEntity<String>  deleteBook(@PathVariable Long bookid)

@@ -1,21 +1,31 @@
 package com.think.ms_demo.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.RestTemplate;
 
 import com.think.ms_demo.repository.BookRepository;
 import com.think.ms_demo.client.ReviewServiceClient;
 import com.think.ms_demo.client.VendorServiceClient;
 import com.think.ms_demo.dto.BookDTO;
+import com.think.ms_demo.exception.BookException.NotFoundBookException;
 import com.think.ms_demo.external.Review;
+import com.think.ms_demo.external.ReviewResponse;
 import com.think.ms_demo.external.Vendor;
 import com.think.ms_demo.mapper.BookMapper;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
+
+// import feign.Request.HttpMethod; // Removed, use Spring's HttpMethod instead
+import org.springframework.http.HttpMethod;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,30 +35,50 @@ public class BookServiceImpl implements BookService {
 
     private static final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
 
+    @Autowired
     private final BookRepository bookRepository;
     private VendorServiceClient vendorServiceClient;
-    private ReviewServiceClient reviewServiceClient;
+   // private ReviewServiceClient reviewServiceClient;
+    private RestTemplate restTemplate;
 
 
     // Constructor-based dependency injection
-    public BookServiceImpl(BookRepository bookRepository, VendorServiceClient vendorServiceClient,ReviewServiceClient reviewServiceClient) {
+    public  BookServiceImpl(BookRepository bookRepository, RestTemplate restTemplate,
+                           @Autowired(required = false) VendorServiceClient vendorServiceClient,
+                           @Autowired(required = false) ReviewServiceClient reviewServiceClient) {
         this.bookRepository = bookRepository;
+        this.restTemplate = restTemplate;
         this.vendorServiceClient = vendorServiceClient;
-        this.reviewServiceClient = reviewServiceClient;
+        //this.reviewServiceClient = reviewServiceClient;
     }
 
    @Override
     public List<BookDTO> getAllBooks() {
-    List<Book> books = bookRepository.findAll();
+        List<Book> books = bookRepository.findAll();
+        List<BookDTO> response = new ArrayList<>();
+        for (Book book : books) {
+            BookDTO bookDTO = new BookDTO();
+            BeanUtils.copyProperties(book, bookDTO);
+            if (book.getVendorId() != null) {
+                try {
+                    Vendor vendor = vendorServiceClient.getVendor(book.getVendorId());
+                    bookDTO.setVendor(vendor);
+                } catch (Exception e) {
+                    log.error("Failed to fetch vendor for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
+                }
 
-    if (books == null || books.isEmpty()) {
-        return List.of(); // Never return null
-    }
+               // try {
+                  //  List<Review> reviews = reviewServiceClient.getReview(book.getBookid());
+                   // bookDTO.setReview(reviews);
+              //  } catch (Exception e) {
+                  //  log.error("Failed to fetch reviews for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
+              //  }
+            }
+            response.add(bookDTO);
+            }
 
-    return books.stream()
-                .map(this::convertToDtoSafe)
-                .collect(Collectors.toList());
-    }
+            return response;
+        }
 
 
     @Override
@@ -59,15 +89,19 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO getBook(Long bookid) {
-        Optional<Book> bookOptional = bookRepository.findById(bookid);
-        if (bookOptional.isPresent()) {
-            Book book = bookOptional.get();
-            return convertToDtoSafe(book);
+        Optional<Book> book = bookRepository.findById(bookid);
+        if (book.isPresent()) {
+            BookDTO bookDTO = convertToDtoSafe(book.get());
+            if (bookDTO != null) {
+                return bookDTO;
+            } else {
+                throw new NotFoundBookException("Book not found with ID: " + bookid);
+            }
         } else {
-            log.warn("Book with ID {} not found", bookid);
-            return null; // or throw an exception
+            throw new NotFoundBookException("Book not found with ID: " + bookid);
         }
     }
+
         
     @Override
     public boolean deleteBook(Long bookid)
@@ -109,26 +143,41 @@ public class BookServiceImpl implements BookService {
         }
     }
 
-     private BookDTO convertToDto(Book book) {
+
+    private BookDTO convertToDto(Book book) {
         Vendor vendor = null;
-        List<Review> reviews = List.of();
+        //List<Review> reviews = List.of();
         try{
             if(book.getVendorId() != null) {
-                vendor = vendorServiceClient.getVendor(book.getVendorId());
+                vendor = restTemplate.getForObject("http://vendor-demo/vendor/" + book.getVendorId(), Vendor.class);
+                if (vendor == null) {
+                    log.warn("Vendor not found for Book ID {}", book.getBookid());
+                } else {
+                    log.debug("Vendor fetched: {}", vendor);
+                }
             }
         }catch (Exception e) {
             log.error("Failed to fetch vendor for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
         }
 
-        try{
-            if(book.getBookid() != null) {
-                reviews = reviewServiceClient.getReview(book.getBookid());
-            }
-        }catch (Exception e) {
-            log.error("Failed to fetch reviews for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
-        }
+       // try{
+           // if(book.getBookid() != null) {
+              //  ResponseEntity<ReviewResponse> response = restTemplate.exchange(
+                 ///       "http://review-demo/review/book/" + book.getBookid(),
+                 //       HttpMethod.GET,
+                 //       null,
+                  //      new ParameterizedTypeReference<ReviewResponse>() {}
+               // );
+               // ReviewResponse reviewResponse = response.getBody();
+               // if (reviewResponse != null && reviewResponse.getData() != null) {
+                //    reviews = reviewResponse.getData();
+                //}
+          //  }
+       // }catch (Exception e) {
+       //     log.error("Failed to fetch reviews for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
+       // }
 
-        return BookMapper.mapToBookDTO(book, vendor, reviews);
+        return BookMapper.mapToBookDTO(book, vendor);
     }
 
 }

@@ -14,8 +14,12 @@ public class BookDTO {
     private String price;
     private boolean available;
     private Vendor vendor;
-    private List<Review> review;
+   // private List<Review> review;
 
+
+
+    public BookDTO() {
+    }
 
 
     // Constructor
@@ -92,11 +96,11 @@ public class BookDTO {
         this.vendor = vendor;
     }
 
-    public List<Review> getReview() {
-        return review;
-    }
-    public void setReview(List<Review> reviews) {
-        this.review = reviews;
-    }
+   // public List<Review> getReview() {
+    //    return review;
+    //}
+    //public void setReview(List<Review> reviews) {
+      //  this.review = reviews;
+    //}
 
 }

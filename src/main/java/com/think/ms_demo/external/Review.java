@@ -6,6 +6,7 @@ public class Review {
     private String title;
     private String description;
     private long rating;
+    private long bookid;
 
 
 
@@ -33,7 +34,10 @@ public class Review {
     public void setRating(long rating) {
         this.rating = rating;
     }
-    public Long getBookid() {
-        throw new UnsupportedOperationException("Unimplemented method 'getBookid'");
+    public long getBookid() {
+        return bookid;
+    }
+    public void setBookid(long bookid) {
+        this.bookid = bookid;
     }
 }
