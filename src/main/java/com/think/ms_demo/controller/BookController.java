@@ -2,7 +2,6 @@ package com.think.ms_demo.controller;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.think.ms_demo.dto.BookDTO;
+
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.response.BookResponseHandler;
 import com.think.ms_demo.service.BookService;
@@ -38,14 +38,13 @@ public class BookController {
     {
         return new ResponseEntity<>("Welcome to the Book Details", HttpStatus.OK);
     }
-    
-    //Get All Books from DB
-
     @GetMapping
     public ResponseEntity<List<BookDTO>> getAllBooks()  
     {
-        return ResponseEntity.ok(bookService.getAllBooks());
-    //return BookResponseHandler.responseBuilder("All Books are here", HttpStatus.OK, bookService.getAllBooks());
+        List<BookDTO> books = bookService.getAllBooks();
+        if (books == null || books.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } return ResponseEntity.ok(books);
     }
 
     // Get a Particular Book from DB

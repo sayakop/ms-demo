@@ -1,16 +1,11 @@
 package com.think.ms_demo.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 
 import com.think.ms_demo.repository.BookRepository;
 import com.think.ms_demo.client.ReviewServiceClient;
@@ -31,31 +26,30 @@ public class BookServiceImpl implements BookService {
     private static final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
 
     private final BookRepository bookRepository;
-
     private VendorServiceClient vendorServiceClient;
     private ReviewServiceClient reviewServiceClient;
 
 
-    @Autowired
-    private RestTemplate restTemplate;
     // Constructor-based dependency injection
-    public BookServiceImpl(BookRepository bookRepository, RestTemplate restTemplate, VendorServiceClient vendorServiceClient,ReviewServiceClient reviewServiceClient) {
-        this.restTemplate = restTemplate;
+    public BookServiceImpl(BookRepository bookRepository, VendorServiceClient vendorServiceClient,ReviewServiceClient reviewServiceClient) {
         this.bookRepository = bookRepository;
         this.vendorServiceClient = vendorServiceClient;
         this.reviewServiceClient = reviewServiceClient;
     }
 
-    @Override
-    public List<BookDTO> getAllBooks()
-    {
+   @Override
+    public List<BookDTO> getAllBooks() {
+    List<Book> books = bookRepository.findAll();
 
-        List<Book> books = bookRepository.findAll();
-        return books.stream()
+    if (books == null || books.isEmpty()) {
+        return List.of(); // Never return null
+    }
+
+    return books.stream()
                 .map(this::convertToDtoSafe)
-                .filter(bookDTO -> bookDTO != null) // Filter out null DTO
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public Book addBooks(Book book)
@@ -116,10 +110,26 @@ public class BookServiceImpl implements BookService {
     }
 
      private BookDTO convertToDto(Book book) {
-        Vendor vendor = vendorServiceClient.getVendor(book.getVendorId());
-        List<Review> reviews = reviewServiceClient.getReview(book.getBookid());
-        BookDTO bookDTO = BookMapper.mapToBookDTO(book, vendor, reviews);
-        return bookDTO;
+        Vendor vendor = null;
+        List<Review> reviews = List.of();
+        try{
+            if(book.getVendorId() != null) {
+                vendor = vendorServiceClient.getVendor(book.getVendorId());
+            }
+        }catch (Exception e) {
+            log.error("Failed to fetch vendor for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
+        }
+
+        try{
+            if(book.getBookid() != null) {
+                reviews = reviewServiceClient.getReview(book.getBookid());
+            }
+        }catch (Exception e) {
+            log.error("Failed to fetch reviews for Book ID {}: {}", book.getBookid(), e.getMessage(), e);
+        }
+
+        return BookMapper.mapToBookDTO(book, vendor, reviews);
     }
+
 }
 
