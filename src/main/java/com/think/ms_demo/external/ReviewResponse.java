@@ -1,5 +1,6 @@
 package com.think.ms_demo.external;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewResponse {
@@ -8,6 +9,12 @@ public class ReviewResponse {
     private String httpStatus;
     private List<Review> data;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public ReviewResponse(String string, ArrayList arrayList) {
+        this.message = string;
+        this.httpStatus = "500";
+        this.data = arrayList;
+    }
     // Getters and setters
     public String getMessage() {
         return message;

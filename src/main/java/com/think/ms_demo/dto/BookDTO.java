@@ -1,8 +1,8 @@
 package com.think.ms_demo.dto;
 
-//import java.util.List;
+import java.util.List;
 
-//import com.think.ms_demo.external.Review;
+import com.think.ms_demo.external.Review;
 import com.think.ms_demo.external.Vendor;
 
 public class BookDTO {
@@ -14,7 +14,7 @@ public class BookDTO {
     private String price;
     private boolean available;
     private Vendor vendor;
-   // private List<Review> review;
+    private List<Review> review;
 
 
 
@@ -96,11 +96,11 @@ public class BookDTO {
         this.vendor = vendor;
     }
 
-   // public List<Review> getReview() {
-    //    return review;
-    //}
-    //public void setReview(List<Review> reviews) {
-      //  this.review = reviews;
-    //}
+    public List<Review> getReview() {
+    return review;
+    }   
+     public void setReview(List<Review> reviews) {
+      this.review = reviews;
+    }
 
 }

@@ -8,15 +8,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.think.ms_demo.external.Review;
+import com.think.ms_demo.external.ReviewResponse;
 
-@FeignClient(name = "review-service", url = "${review.service.base-url}")
+@FeignClient(name = "reviewms", fallbackFactory = ReviewServiceClientFallbackFactory.class)
 public interface ReviewServiceClient {
     
     @GetMapping("/review")
-    ResponseWrapper getAllReviews();  // Wrap response to handle "data" field
+    ReviewResponse getAllReviews();  // Wrap response to handle "data" field
 
     @GetMapping("/review/book/{bookid}")
-    List<Review> getReview(@PathVariable("bookid") Long bookid);
+    ReviewResponse getReview(@PathVariable("bookid") Long bookid);
 
     class ResponseWrapper {
         private List<Review> data;
