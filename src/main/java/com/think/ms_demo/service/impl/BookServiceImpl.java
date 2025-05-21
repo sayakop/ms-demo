@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.ResponseEntity;
+//import org.springframework.core.ParameterizedTypeReference;
+//import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,15 +16,15 @@ import com.think.ms_demo.client.ReviewServiceClient;
 import com.think.ms_demo.client.VendorServiceClient;
 import com.think.ms_demo.dto.BookDTO;
 import com.think.ms_demo.exception.BookException.NotFoundBookException;
-import com.think.ms_demo.external.Review;
-import com.think.ms_demo.external.ReviewResponse;
+//import com.think.ms_demo.external.Review;
+//import com.think.ms_demo.external.ReviewResponse;
 import com.think.ms_demo.external.Vendor;
 import com.think.ms_demo.mapper.BookMapper;
 import com.think.ms_demo.model.Book;
 import com.think.ms_demo.service.BookService;
 
 // import feign.Request.HttpMethod; // Removed, use Spring's HttpMethod instead
-import org.springframework.http.HttpMethod;
+//import org.springframework.http.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

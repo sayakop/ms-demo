@@ -1,19 +1,25 @@
 package com.think.ms_demo.external;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Vendor {
 
-    private String vendorId;
+    @JsonProperty("vendorId")
+    private Long vendorId;
+    @JsonProperty("vendorName")
     private String vendorName;
+    @JsonProperty("vendorAddress")
     private String vendorAddress;
+    @JsonProperty("vendorPhoneNumber")
     private String vendorPhoneNumber;
+    @JsonProperty("vendorAge")
     private String vendorAge;
 
 
-    public String getVendorId() {
+    public Long getVendorId() {
         return vendorId;
     }
-    public void setVendorId(String vendorId) {
+    public void setVendorId(Long vendorId) {
         this.vendorId = vendorId;
     }
     public String getVendorName() {

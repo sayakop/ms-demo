@@ -30,9 +30,14 @@ review:
   service:
     base-url: http://localhost:8083 # Base URL for the review service
 
-vendor:
-  service:
-    base-url: http://localhost:8081 # Base URL for the vendor service
+
+logging:
+  level:
+    '[com.think.ms_demo.client]': DEBUG
+    feign: DEBUG
+    '[org.springframework.cloud.netflix.eureka]': DEBUG
+    '[org.springframework.cloud.openfeign]': DEBUG
+
 #Eureka
 eureka:
   client:

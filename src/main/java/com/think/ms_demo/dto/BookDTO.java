@@ -1,8 +1,8 @@
 package com.think.ms_demo.dto;
 
-import java.util.List;
+//import java.util.List;
 
-import com.think.ms_demo.external.Review;
+//import com.think.ms_demo.external.Review;
 import com.think.ms_demo.external.Vendor;
 
 public class BookDTO {
