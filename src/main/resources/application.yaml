@@ -10,6 +10,10 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver
         username: root
         password: admin_sayak25
+        # username: springuser
+        # password: springpass
+        # url: jdbc:mysql://mysql:3306/demo_db
+        # driver-class-name: com.mysql.cj.jdbc.Driver  
     jpa:
         hibernate:
             ddl-auto: update
