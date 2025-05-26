@@ -21,7 +21,7 @@ spring:
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.MySQL8Dialect
-management:
+management: 
   endpoints:
     web:
       exposure:
@@ -29,6 +29,12 @@ management:
   endpoint:
     health:
       show-details: always
+
+  #Zipkin
+  ############## Zipkin Configuration ##############    
+  tracing:
+    sampling:
+      probability: 1.0 # 100% sampling rate
     
 
 logging:
@@ -50,5 +56,3 @@ eureka:
     ip-address: 127.0.0.1
     instance-id: ms-demo:${server.port}
     hostname: localhost
-
-
