@@ -2,8 +2,8 @@ server:
   port: 8082
 
 spring:
-    application:
-        name: ms-demo
+    #application:
+        #name: ms-demo
     ############## MySQL DB Configuration ##############
     datasource:
         url: jdbc:mysql://localhost:3306/springbootdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -21,6 +21,12 @@ spring:
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.MySQL8Dialect
+
+#Config Server
+    config:
+      import: configserver:http://localhost:8080            
+
+
 management: 
   endpoints:
     web:
