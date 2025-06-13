@@ -1,0 +1,11 @@
+server:
+  port: 9082
+
+spring:
+  application:
+    name: ms-demo
+
+eureka:
+  instance:
+    instance-id: ms-demo:9082
+    hostname: localhost
